@@ -8,9 +8,10 @@ import (
 )
 
 type biliPlugin struct {
-	e    *zero.Engine
-	env  plugin.Env
-	conf Config
+	e      *zero.Engine
+	env    plugin.Env
+	groups plugin.Groups
+	conf   Config
 }
 
 func NewPlugin() plugin.Plugin {
@@ -20,7 +21,7 @@ func NewPlugin() plugin.Plugin {
 func (b *biliPlugin) Init(engine *zero.Engine, env plugin.Env) error {
 	b.e = engine
 	b.env = env
-
+	b.groups = env.Groups()
 	return b.init()
 }
 

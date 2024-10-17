@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/kohmebot/livebili/gopool"
+	"github.com/kohmebot/plugin/pkg/chain"
+	"github.com/kohmebot/plugin/pkg/gopool"
+
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"gorm.io/gorm"
@@ -93,36 +95,41 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 	}
 	if living {
 		b.env.RangeBot(func(ctx *zero.Ctx) bool {
-			msgChan := []message.MessageSegment{
+			var msgChain chain.MessageChain
+			msgChain.Split(
 				message.AtAll(),
-				message.Text(fmt.Sprintf("\n@%s", info.Uname)),
-				message.Text(fmt.Sprintf("\n%s\n%s\n", b.conf.randChoseLiveTips(), info.Title)),
+				message.Text(fmt.Sprintf("@%s", info.Uname)),
+				message.Text(b.conf.randChoseLiveTips()),
+				message.Text(info.Title),
 				message.Image(info.CoverFromUser),
-				message.Text(fmt.Sprintf("\nhttps://live.bilibili.com/%d", info.RoomId)),
-			}
-			for _, group := range b.conf.Groups {
-				g := group
+				message.Text(fmt.Sprintf("https://live.bilibili.com/%d", info.RoomId)),
+			)
+			b.groups.RangeGroup(func(group int64) bool {
 				gopool.Go(func() {
-					ctx.SendGroupMessage(g, msgChan)
+					ctx.SendGroupMessage(group, msgChain)
 				})
-			}
+				return true
+			})
+
 			return true
 		})
 		return nil
 	}
 	if !living && b.conf.SendOff {
 		b.env.RangeBot(func(ctx *zero.Ctx) bool {
-			msgChan := []message.MessageSegment{
-				message.Text(fmt.Sprintf("@%s\n", info.Uname)),
+			var msgChain chain.MessageChain
+			msgChain.Split(
+				message.Text(fmt.Sprintf("@%s", info.Uname)),
 				message.Image(info.Face),
-				message.Text(fmt.Sprintf("\n%s", b.conf.randChoseOffTips())),
-			}
-			for _, group := range b.conf.Groups {
-				g := group
+				message.Text(fmt.Sprintf(b.conf.randChoseOffTips())),
+			)
+			b.groups.RangeGroup(func(group int64) bool {
 				gopool.Go(func() {
-					ctx.SendGroupMessage(g, msgChan)
+					ctx.SendGroupMessage(group, msgChain)
 				})
-			}
+				return true
+			})
+
 			return true
 		})
 		return nil
