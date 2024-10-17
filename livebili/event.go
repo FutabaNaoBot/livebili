@@ -101,8 +101,9 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 				message.Text(fmt.Sprintf("\nhttps://live.bilibili.com/%d", info.RoomId)),
 			}
 			for _, group := range b.conf.Groups {
+				g := group
 				gopool.Go(func() {
-					ctx.SendGroupMessage(group, msgChan)
+					ctx.SendGroupMessage(g, msgChan)
 				})
 			}
 			return true
@@ -117,8 +118,9 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 				message.Text(fmt.Sprintf("\n%s", b.conf.randChoseOffTips())),
 			}
 			for _, group := range b.conf.Groups {
+				g := group
 				gopool.Go(func() {
-					ctx.SendGroupMessage(group, msgChan)
+					ctx.SendGroupMessage(g, msgChan)
 				})
 			}
 			return true
