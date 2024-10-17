@@ -1,9 +1,10 @@
-module github.com/futabanaobot/livebili
+module github.com/kohmebot/livebili
 
 go 1.20
 
 require (
-	github.com/futabanaobot/plugin v1.0.0
+	github.com/kohmebot/plugin v1.0.1
+	github.com/panjf2000/ants/v2 v2.10.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/wdvxdr1123/ZeroBot v1.7.5
 	gorm.io/gorm v1.25.12
@@ -13,7 +14,6 @@ require (
 	github.com/FloatTech/ttl v0.0.0-20240716161252-965925764562 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/panjf2000/ants/v2 v2.10.0 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect

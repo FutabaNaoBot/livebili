@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/futabanaobot/livebili/livebili"
-	"github.com/futabanaobot/plugin"
+	"github.com/kohmebot/livebili/livebili"
+	"github.com/kohmebot/plugin"
 )
 
 func NewPlugin() plugin.Plugin {
