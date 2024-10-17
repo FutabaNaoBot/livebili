@@ -88,23 +88,44 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 			return err
 		}
 	}
-	if !living || !change {
+	if !change {
 		return nil
 	}
-	b.env.RangeBot(func(ctx *zero.Ctx) bool {
-		msgChan := []message.MessageSegment{
-			message.AtAll(),
-			message.Text(fmt.Sprintf("\n开播啦！\n%s\n", info.Title)),
-			message.Image(info.CoverFromUser),
-			message.Text(fmt.Sprintf("https://live.bilibili.com/%d", info.RoomId)),
-		}
-		for _, group := range b.conf.Groups {
-			gopool.Go(func() {
-				ctx.SendGroupMessage(group, msgChan)
-			})
-		}
-		return true
-	})
+	if living {
+		b.env.RangeBot(func(ctx *zero.Ctx) bool {
+			msgChan := []message.MessageSegment{
+				message.AtAll(),
+				message.Text(fmt.Sprintf("\n@%s\n", info.Uname)),
+				message.Image(info.Face),
+				message.Text(fmt.Sprintf("\n%s\n%s\n", b.conf.randChoseLiveTips(), info.Title)),
+				message.Image(info.CoverFromUser),
+				message.Text(fmt.Sprintf("\nhttps://live.bilibili.com/%d", info.RoomId)),
+			}
+			for _, group := range b.conf.Groups {
+				gopool.Go(func() {
+					ctx.SendGroupMessage(group, msgChan)
+				})
+			}
+			return true
+		})
+		return nil
+	}
+	if !living && b.conf.SendOff {
+		b.env.RangeBot(func(ctx *zero.Ctx) bool {
+			msgChan := []message.MessageSegment{
+				message.Text(fmt.Sprintf("\n@%s\n", info.Uname)),
+				message.Image(info.Face),
+				message.Text(fmt.Sprintf("\n%s", b.conf.randChoseOffTips())),
+			}
+			for _, group := range b.conf.Groups {
+				gopool.Go(func() {
+					ctx.SendGroupMessage(group, msgChan)
+				})
+			}
+			return true
+		})
+		return nil
+	}
 
 	return nil
 }
