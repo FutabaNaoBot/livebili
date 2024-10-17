@@ -50,12 +50,15 @@ func (b *biliPlugin) initData(db *gorm.DB) error {
 }
 
 func (b *biliPlugin) ticker() {
-	t := time.NewTicker(time.Second * time.Duration(b.conf.CheckDuration))
+	dur := time.Second * time.Duration(b.conf.CheckDuration)
+	t := time.NewTicker(dur)
 	for range t.C {
+		logrus.Infof("tock...%.2f sec", dur.Seconds())
 		err := b.doCheckLive()
 		if err != nil {
 			logrus.Errorf("check live error: %v", err)
 		}
+		t.Reset(dur)
 	}
 
 }

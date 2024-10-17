@@ -25,11 +25,11 @@ func (b *biliPlugin) Init(engine *zero.Engine, env plugin.Env) error {
 }
 
 func (b *biliPlugin) Name() string {
-	return "BiliBili-Live"
+	return "livebili"
 }
 
 func (b *biliPlugin) Description() string {
-	return "推送开播信息"
+	return "推送bilibili直播信息"
 }
 
 func (b *biliPlugin) Commands() command.Commands {
