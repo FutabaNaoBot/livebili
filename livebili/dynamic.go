@@ -12,6 +12,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"gorm.io/gorm"
 	"io"
+	"strings"
 	"sync"
 	"time"
 )
@@ -162,11 +163,12 @@ func (b *biliPlugin) onAv(ctx *zero.Ctx, dynamic *DynamicModules) {
 
 	var msgChain chain.MessageChain
 	msgChain.Split(
+		message.AtAll(),
 		message.Text(fmt.Sprintf("@%s", userName)),
 		message.Text(fmt.Sprintf("%s投稿了视频", pubTime)),
 		message.Text(fmt.Sprintf("【%s】", title)),
 		message.Image(cover),
-		message.Text(url),
+		message.Text(strings.TrimLeft(url, "//")),
 	)
 	b.groups.RangeGroup(func(group int64) bool {
 		gopool.Go(func() {
@@ -191,6 +193,7 @@ func (b *biliPlugin) onDraw(ctx *zero.Ctx, dynamic *DynamicModules) {
 
 	var msgChain chain.MessageChain
 	msgChain.Split(
+		message.AtAll(),
 		message.Text(fmt.Sprintf("@%s", userName)),
 		message.Text(fmt.Sprintf("%s发布了动态", pubTime)),
 		message.Text(text),
@@ -217,6 +220,7 @@ func (b *biliPlugin) onWord(ctx *zero.Ctx, dynamic *DynamicModules) {
 
 	var msgChain chain.MessageChain
 	msgChain.Split(
+		message.AtAll(),
 		message.Text(fmt.Sprintf("@%s", userName)),
 		message.Text(fmt.Sprintf("%s发布了动态", pubTime)),
 		message.Text(text),
