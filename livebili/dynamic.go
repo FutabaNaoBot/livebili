@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/kohmebot/livebili/request"
 	"github.com/kohmebot/plugin/pkg/chain"
 	"github.com/kohmebot/plugin/pkg/gopool"
 	"github.com/sirupsen/logrus"
@@ -11,7 +12,6 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"gorm.io/gorm"
 	"io"
-	"net/http"
 	"sync"
 	"time"
 )
@@ -39,7 +39,8 @@ func (b *biliPlugin) doCheckDynamic() error {
 }
 
 func (b *biliPlugin) doCheckOneDynamic(uid int64) error {
-	resp, err := http.Get(fmt.Sprintf("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?host_mid=%d", uid))
+
+	resp, err := request.DoGet(fmt.Sprintf("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?host_mid=%d", uid), b.conf.Cookies)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/kohmebot/livebili/request"
 	"github.com/kohmebot/plugin/pkg/chain"
 	"github.com/kohmebot/plugin/pkg/gopool"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"gorm.io/gorm"
 	"io"
-	"net/http"
 )
 
 func (b *biliPlugin) doCheckLive() error {
@@ -27,7 +27,7 @@ func (b *biliPlugin) doCheckLive() error {
 	if err != nil {
 		return err
 	}
-	resp, err := http.Post("https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := request.DoPost("https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids", "application/json", bytes.NewBuffer(jsonData), b.conf.Cookies)
 	if err != nil {
 		return err
 	}

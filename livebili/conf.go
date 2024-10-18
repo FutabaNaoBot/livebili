@@ -15,6 +15,9 @@ type Config struct {
 	SendOff bool `yaml:"send_off" mapstructure:"send_off"`
 	// 检查动态的间隔时间，单位为秒
 	CheckDynamicDuration int `yaml:"check_dynamic_duration" mapstructure:"check_dynamic_duration"`
+
+	// b站的cookies
+	Cookies string `yaml:"cookies" mapstructure:"cookies"`
 }
 
 func (c *Config) randChoseLiveTips() string {
