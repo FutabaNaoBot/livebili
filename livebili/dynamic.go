@@ -77,7 +77,7 @@ func (b *biliPlugin) doCheckOneDynamic(uid int64) error {
 			gopool.Go(func() {
 				defer wg.Done()
 				for _, update := range updates {
-					b.sendDynamic(ctx, update)
+					b.sendDynamic(ctx, &update)
 					// 发送每个动态间等2s
 					time.Sleep(2 * time.Second)
 				}
@@ -91,7 +91,7 @@ func (b *biliPlugin) doCheckOneDynamic(uid int64) error {
 
 }
 
-func (b *biliPlugin) updateDynamic(uid int64, dynamic *DynamicResp) (updates []*Dynamic, err error) {
+func (b *biliPlugin) updateDynamic(uid int64, dynamic *DynamicResp) (updates []Dynamic, err error) {
 	if len(dynamic.Data.Items) <= 0 {
 		return nil, nil
 	}
@@ -123,7 +123,9 @@ func (b *biliPlugin) updateDynamic(uid int64, dynamic *DynamicResp) (updates []*
 	// 找出更新的动态
 	for _, item := range dynamic.Data.Items {
 		if item.Modules.PutTs > record.LastPubTime {
-			updates = append(updates, &item)
+			updates = append(updates, item)
+		} else {
+			break
 		}
 	}
 
