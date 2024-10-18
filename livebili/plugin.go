@@ -30,7 +30,7 @@ func (b *biliPlugin) Name() string {
 }
 
 func (b *biliPlugin) Description() string {
-	return "推送bilibili直播信息"
+	return "推送bilibili动态"
 }
 
 func (b *biliPlugin) Commands() command.Commands {
@@ -38,5 +38,5 @@ func (b *biliPlugin) Commands() command.Commands {
 }
 
 func (b *biliPlugin) Version() version.Version {
-	return version.NewVersion(0, 0, 1)
+	return version.NewVersion(0, 0, 12)
 }
