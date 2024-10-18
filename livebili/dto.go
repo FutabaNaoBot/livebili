@@ -63,7 +63,7 @@ type ModuleAuthor struct {
 	// 昨天
 	PubTime string `json:"pub_time"`
 	// Unix秒级时间戳
-	PutTs int64 `json:"put_ts"`
+	PutTs int64 `json:"pub_ts"`
 	// 投稿了视频
 	// 直播了
 	// 投稿了文章

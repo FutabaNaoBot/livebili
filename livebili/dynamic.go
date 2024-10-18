@@ -66,6 +66,9 @@ func (b *biliPlugin) doCheckOneDynamic(uid int64) error {
 	if err != nil {
 		return err
 	}
+	if len(updates) <= 0 {
+		return nil
+	}
 	wg := sync.WaitGroup{}
 
 	b.env.RangeBot(func(ctx *zero.Ctx) bool {
@@ -96,7 +99,7 @@ func (b *biliPlugin) updateDynamic(uid int64, dynamic *DynamicResp) (updates []*
 	if err != nil {
 		return nil, err
 	}
-	lastPubTime := dynamic.Data.Items[0].Modules.PutTs
+	latestPubTime := dynamic.Data.Items[0].Modules.PutTs
 	record := &DynamicRecord{}
 	record.Uid = uid
 	err = db.First(&record, uid).Error
@@ -105,7 +108,7 @@ func (b *biliPlugin) updateDynamic(uid int64, dynamic *DynamicResp) (updates []*
 			// 如果没有记录，插入一条新记录
 			record = &DynamicRecord{
 				Uid:         uid,
-				LastPubTime: lastPubTime,
+				LastPubTime: latestPubTime,
 			}
 			err = db.Create(&record).Error
 		}
@@ -113,7 +116,7 @@ func (b *biliPlugin) updateDynamic(uid int64, dynamic *DynamicResp) (updates []*
 	}
 
 	// 说明动态未更新
-	if record.LastPubTime >= lastPubTime {
+	if record.LastPubTime >= latestPubTime {
 		return nil, nil
 	}
 
@@ -123,7 +126,13 @@ func (b *biliPlugin) updateDynamic(uid int64, dynamic *DynamicResp) (updates []*
 			updates = append(updates, &item)
 		}
 	}
-	return updates, nil
+
+	if len(updates) > 0 {
+		record.LastPubTime = updates[0].Modules.PutTs
+		err = db.Save(&record).Error
+	}
+
+	return updates, err
 
 }
 
