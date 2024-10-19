@@ -96,6 +96,7 @@ func (b *biliPlugin) updateDynamic(uid int64, dynamic *DynamicResp) (updates []D
 	if len(dynamic.Data.Items) <= 0 {
 		return nil, nil
 	}
+	dynamic.TopReSort()
 	db, err := b.env.GetDB()
 	if err != nil {
 		return nil, err

@@ -1,5 +1,7 @@
 package livebili
 
+import "sort"
+
 type LiveRecord struct {
 	Uid    int64 `gorm:"primaryKey"`
 	IsLive bool
@@ -37,6 +39,23 @@ type DynamicResp struct {
 	Data    DynamicData `json:"data"`
 }
 
+func (d *DynamicResp) TopReSort() {
+	topIdx := -1
+	for idx, item := range d.Data.Items {
+		if item.Modules.ModuleTag.Text == "置顶" {
+			topIdx = idx
+		}
+		break
+	}
+	if topIdx < 0 {
+		return
+	}
+	sort.Slice(d.Data.Items, func(i, j int) bool {
+		return d.Data.Items[i].Modules.PutTs > d.Data.Items[j].Modules.PutTs
+	})
+
+}
+
 type DynamicData struct {
 	HasMore bool      `json:"has_more"`
 	Items   []Dynamic `json:"items"`
@@ -51,6 +70,13 @@ type Dynamic struct {
 type DynamicModules struct {
 	ModuleAuthor  `json:"module_author"`
 	ModuleDynamic `json:"module_dynamic"`
+	ModuleTag     `json:"module_tag"`
+}
+
+// ModuleTag 置顶信息
+type ModuleTag struct {
+	// 置顶动态出现这个对象，否则没有
+	Text string `json:"text"`
 }
 
 type ModuleAuthor struct {
