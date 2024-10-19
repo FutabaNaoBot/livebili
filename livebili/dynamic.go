@@ -78,7 +78,7 @@ func (b *biliPlugin) doCheckOneDynamic(uid int64) error {
 			gopool.Go(func() {
 				defer wg.Done()
 				for _, update := range updates {
-					b.sendDynamic(ctx, &update)
+					b.sendDynamic(ctx, group, &update)
 					// 发送每个动态间等2s
 					time.Sleep(2 * time.Second)
 				}
@@ -140,21 +140,21 @@ func (b *biliPlugin) updateDynamic(uid int64, dynamic *DynamicResp) (updates []D
 
 }
 
-func (b *biliPlugin) sendDynamic(ctx *zero.Ctx, dynamic *Dynamic) {
+func (b *biliPlugin) sendDynamic(ctx *zero.Ctx, group int64, dynamic *Dynamic) {
 	switch dynamic.Type {
 	case "DYNAMIC_TYPE_AV":
-		b.onAv(ctx, &dynamic.Modules)
+		b.onAv(ctx, group, &dynamic.Modules)
 	case "DYNAMIC_TYPE_DRAW":
-		b.onDraw(ctx, &dynamic.Modules)
+		b.onDraw(ctx, group, &dynamic.Modules)
 	case "DYNAMIC_TYPE_WORD":
-		b.onWord(ctx, &dynamic.Modules)
+		b.onWord(ctx, group, &dynamic.Modules)
 	default:
 		logrus.Warnf("unknown dynamic type: %s", dynamic.Type)
 	}
 }
 
 // 投稿了视频
-func (b *biliPlugin) onAv(ctx *zero.Ctx, dynamic *DynamicModules) {
+func (b *biliPlugin) onAv(ctx *zero.Ctx, group int64, dynamic *DynamicModules) {
 	userName := dynamic.ModuleAuthor.Name
 	pubTime := dynamic.ModuleAuthor.PubTime
 
@@ -171,17 +171,12 @@ func (b *biliPlugin) onAv(ctx *zero.Ctx, dynamic *DynamicModules) {
 		message.Image(cover),
 		message.Text(strings.TrimLeft(url, "//")),
 	)
-	b.groups.RangeGroup(func(group int64) bool {
-		gopool.Go(func() {
-			ctx.SendGroupMessage(group, msgChain)
-		})
-		return true
-	})
+	ctx.SendGroupMessage(group, msgChain)
 
 }
 
 // 带图动态
-func (b *biliPlugin) onDraw(ctx *zero.Ctx, dynamic *DynamicModules) {
+func (b *biliPlugin) onDraw(ctx *zero.Ctx, group int64, dynamic *DynamicModules) {
 	userName := dynamic.ModuleAuthor.Name
 	pubTime := dynamic.ModuleAuthor.PubTime
 
@@ -203,17 +198,12 @@ func (b *biliPlugin) onDraw(ctx *zero.Ctx, dynamic *DynamicModules) {
 		msgChain.Line()
 		msgChain.Split(imgMsg...)
 	}
-	b.groups.RangeGroup(func(group int64) bool {
-		gopool.Go(func() {
-			ctx.SendGroupMessage(group, msgChain)
-		})
-		return true
-	})
+	ctx.SendGroupMessage(group, msgChain)
 
 }
 
 // 纯文字动态
-func (b *biliPlugin) onWord(ctx *zero.Ctx, dynamic *DynamicModules) {
+func (b *biliPlugin) onWord(ctx *zero.Ctx, group int64, dynamic *DynamicModules) {
 	userName := dynamic.ModuleAuthor.Name
 	pubTime := dynamic.ModuleAuthor.PubTime
 
@@ -226,10 +216,5 @@ func (b *biliPlugin) onWord(ctx *zero.Ctx, dynamic *DynamicModules) {
 		message.Text(fmt.Sprintf("%s发布了动态", pubTime)),
 		message.Text(text),
 	)
-	b.groups.RangeGroup(func(group int64) bool {
-		gopool.Go(func() {
-			ctx.SendGroupMessage(group, msgChain)
-		})
-		return true
-	})
+	ctx.SendGroupMessage(group, msgChain)
 }
