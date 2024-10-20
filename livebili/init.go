@@ -3,10 +3,8 @@ package livebili
 import (
 	"errors"
 	"fmt"
-	"github.com/kohmebot/plugin/pkg/chain"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
 	"gorm.io/gorm"
 	"time"
 )
@@ -87,16 +85,7 @@ func (b *biliPlugin) tickerDynamic() {
 
 func (b *biliPlugin) sendError(err error) {
 	b.env.RangeBot(func(ctx *zero.Ctx) bool {
-		b.groups.RangeGroup(func(group int64) bool {
-			var msgChain chain.MessageChain
-			msgChain.Split(
-				message.Text("我出错了喵！快帮我联系管理员喵！！"),
-				message.Text(err.Error()),
-				message.Text(fmt.Sprintf("from: %s", b.Name())),
-			)
-			ctx.SendGroupMessage(group, msgChain)
-			return true
-		})
+		b.env.Error(ctx, fmt.Errorf("我出错了喵！快帮我联系管理员喵！！%w", err))
 		return true
 	})
 }
