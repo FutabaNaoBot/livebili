@@ -38,5 +38,9 @@ func (b *biliPlugin) Commands() command.Commands {
 }
 
 func (b *biliPlugin) Version() version.Version {
-	return version.NewVersion(0, 0, 20)
+	return version.NewVersion(0, 0, 21)
+}
+
+func (b *biliPlugin) OnBoot() {
+
 }
