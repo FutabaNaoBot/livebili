@@ -60,7 +60,8 @@ func (b *biliPlugin) tickerLive() {
 		logrus.Debugf("tock...%.2f sec", dur.Seconds())
 		err := b.doCheckLive()
 		if err != nil {
-			logrus.Errorf("check live error: %v", err)
+			err = fmt.Errorf("check live error: %w", err)
+			logrus.Error(err.Error())
 		}
 		t.Reset(dur)
 		s.Error(err)
@@ -76,7 +77,8 @@ func (b *biliPlugin) tickerDynamic() {
 		logrus.Debugf("tock...%.2f sec", dur.Seconds())
 		err := b.doCheckDynamic()
 		if err != nil {
-			logrus.Errorf("check dynamic error: %v", err)
+			err = fmt.Errorf("check dynamic error: %w", err)
+			logrus.Error(err.Error())
 		}
 		t.Reset(dur)
 		s.Error(err)

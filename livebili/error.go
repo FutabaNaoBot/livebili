@@ -1,7 +1,7 @@
 package livebili
 
 import (
-	"github.com/kohmebot/plugin/pkg/gopool"
+	"github.com/kohmebot/pkg/gopool"
 	"sync"
 	"time"
 )
@@ -13,7 +13,7 @@ type ErrorSender struct {
 	lastErrorTime time.Time
 }
 
-var sendDuration time.Duration = 5 * time.Minute
+var sendDuration = 5 * time.Minute
 
 func newErrorSender(do func(err error)) *ErrorSender {
 	return &ErrorSender{do: do}

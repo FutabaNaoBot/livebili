@@ -1,9 +1,10 @@
 package livebili
 
 import (
+	"fmt"
+	"github.com/kohmebot/pkg/command"
+	"github.com/kohmebot/pkg/version"
 	"github.com/kohmebot/plugin"
-	"github.com/kohmebot/plugin/pkg/command"
-	"github.com/kohmebot/plugin/pkg/version"
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
 
@@ -33,12 +34,12 @@ func (b *biliPlugin) Description() string {
 	return "推送bilibili动态"
 }
 
-func (b *biliPlugin) Commands() command.Commands {
+func (b *biliPlugin) Commands() fmt.Stringer {
 	return command.NewCommands()
 }
 
-func (b *biliPlugin) Version() version.Version {
-	return version.NewVersion(0, 0, 21)
+func (b *biliPlugin) Version() uint64 {
+	return uint64(version.NewVersion(0, 0, 30))
 }
 
 func (b *biliPlugin) OnBoot() {
