@@ -8,6 +8,7 @@ import (
 	"github.com/kohmebot/livebili/request"
 	"github.com/kohmebot/pkg/chain"
 	"github.com/kohmebot/pkg/gopool"
+	"time"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -68,8 +69,9 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 如果没有记录，插入一条新记录并设置状态
 			record = &LiveRecord{
-				Uid:    int64(info.Uid),
-				IsLive: IsLiving(info.LiveStatus),
+				Uid:         int64(info.Uid),
+				IsLive:      IsLiving(info.LiveStatus),
+				LastOffTime: time.Now(),
 			}
 			err = db.Create(&record).Error
 		}
@@ -85,6 +87,13 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 	if change {
 		// 状态有变化，更新数据库
 		record.IsLive = living
+		if living {
+			// 状态变化且直播，则记录开播时间
+			record.LastLiveTime = time.Now()
+		} else {
+			// 状态变化且下播，则记录下播时间
+			record.LastOffTime = time.Now()
+		}
 		if err := db.Save(&record).Error; err != nil {
 			return err
 		}
@@ -98,7 +107,7 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 			msgChain.Split(
 				message.AtAll(),
 				message.Text(fmt.Sprintf("@%s", info.Uname)),
-				message.Text(b.conf.randChoseLiveTips()),
+				message.Text(formatDuration(b.conf.randChoseLiveTips(), record.LastOffTime)),
 				message.Text(info.Title),
 				message.Image(info.CoverFromUser),
 				message.Text(fmt.Sprintf("https://live.bilibili.com/%d", info.RoomId)),
@@ -120,7 +129,7 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 			msgChain.Split(
 				message.Text(fmt.Sprintf("@%s", info.Uname)),
 				message.Image(info.Face),
-				message.Text(fmt.Sprintf(b.conf.randChoseOffTips())),
+				message.Text(formatDuration(b.conf.randChoseOffTips(), record.LastLiveTime)),
 			)
 			b.groups.RangeGroup(func(group int64) bool {
 				gopool.Go(func() {

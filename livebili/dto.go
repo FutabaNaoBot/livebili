@@ -1,10 +1,17 @@
 package livebili
 
-import "sort"
+import (
+	"sort"
+	"time"
+)
 
 type LiveRecord struct {
 	Uid    int64 `gorm:"primaryKey"`
 	IsLive bool
+	// 上次直播时间
+	LastLiveTime time.Time
+	// 上次下播时间
+	LastOffTime time.Time
 }
 
 type LiveResp struct {
