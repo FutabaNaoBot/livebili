@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+type FollowerRecord struct {
+	Uid int64 `gorm:"primaryKey"`
+	// 粉丝数
+	Follower int
+}
+
 type LiveRecord struct {
 	Uid    int64 `gorm:"primaryKey"`
 	IsLive bool
@@ -141,4 +147,19 @@ type MajorDraw struct {
 type DrawItem struct {
 	// 图片URL
 	Src string `json:"src"`
+}
+
+type FollowerResp struct {
+	Code    int          `json:"code"`
+	Message string       `json:"message"`
+	Data    RelationData `json:"data"`
+}
+
+type RelationData struct {
+	// uid
+	Mid int `json:"mid"`
+	// 关注数
+	Following int `json:"following"`
+	// 粉丝数
+	Follower int `json:"follower"`
 }

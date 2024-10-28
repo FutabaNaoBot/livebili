@@ -36,7 +36,7 @@ func (b *biliPlugin) doCheckDynamic() error {
 			err = errors.Join(err, fmt.Errorf("checkDynamicError %w", doErr))
 		}
 	}
-	return nil
+	return err
 }
 
 func (b *biliPlugin) doCheckOneDynamic(uid int64) error {

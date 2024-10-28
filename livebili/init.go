@@ -27,6 +27,7 @@ func (b *biliPlugin) init() error {
 	}
 	go b.tickerLive()
 	go b.tickerDynamic()
+	go b.tickerFollower()
 	return nil
 }
 
@@ -49,7 +50,11 @@ func (b *biliPlugin) initData(db *gorm.DB) error {
 		}
 
 	}
-	return db.AutoMigrate(&DynamicRecord{})
+
+	return errors.Join(
+		db.AutoMigrate(&DynamicRecord{}),
+		db.AutoMigrate(&FollowerRecord{}),
+	)
 }
 
 func (b *biliPlugin) tickerLive() {
@@ -78,6 +83,22 @@ func (b *biliPlugin) tickerDynamic() {
 		err := b.doCheckDynamic()
 		if err != nil {
 			err = fmt.Errorf("check dynamic error: %w", err)
+			logrus.Error(err.Error())
+		}
+		t.Reset(dur)
+		s.Error(err)
+	}
+}
+
+func (b *biliPlugin) tickerFollower() {
+	dur := time.Second * time.Duration(b.conf.CheckFollowerDuration)
+	t := time.NewTicker(dur)
+	s := newErrorSender(b.sendError)
+	for range t.C {
+		logrus.Debugf("tock...%.2f sec", dur.Seconds())
+		err := b.doCheckFollower()
+		if err != nil {
+			err = fmt.Errorf("check follower error: %w", err)
 			logrus.Error(err.Error())
 		}
 		t.Reset(dur)

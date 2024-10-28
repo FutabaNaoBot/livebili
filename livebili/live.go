@@ -17,37 +17,10 @@ import (
 )
 
 func (b *biliPlugin) doCheckLive() error {
-	var uids []int64
-	for _, uid := range b.conf.Uids {
-		uids = append(uids, uid)
-	}
-	data := map[string]interface{}{
-		"uids": uids,
-	}
-	jsonData, err := json.Marshal(data)
+	live, err := b.checkLive(b.conf.Uids)
 	if err != nil {
 		return err
 	}
-	resp, err := request.DoPost("https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids", "application/json", bytes.NewBuffer(jsonData), b.conf.Cookies)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	live := LiveResp{}
-	err = json.Unmarshal(body, &live)
-	if err != nil {
-		return err
-	}
-	if live.Code != 0 {
-		return fmt.Errorf("code: %d,msg: %s", live.Code, live.Msg)
-	}
-
 	for _, info := range live.Data {
 		err = b.sendRoomInfo(&info)
 		if err != nil {
@@ -144,4 +117,37 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 	}
 
 	return nil
+}
+
+func (b *biliPlugin) checkLive(uids []int64) (r LiveResp, err error) {
+	for _, uid := range b.conf.Uids {
+		uids = append(uids, uid)
+	}
+	data := map[string]interface{}{
+		"uids": uids,
+	}
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return r, err
+	}
+	resp, err := request.DoPost("https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids", "application/json", bytes.NewBuffer(jsonData), b.conf.Cookies)
+	if err != nil {
+		return r, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return r, err
+	}
+
+	r = LiveResp{}
+	err = json.Unmarshal(body, &r)
+	if err != nil {
+		return r, err
+	}
+	if r.Code != 0 {
+		return r, fmt.Errorf("code: %d,msg: %s", r.Code, r.Msg)
+	}
+	return r, err
 }
