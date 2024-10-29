@@ -1,14 +1,21 @@
 package livebili
 
 import (
+	"gorm.io/gorm"
 	"sort"
 	"time"
 )
 
 type FollowerRecord struct {
 	Uid int64 `gorm:"primaryKey"`
-	// 粉丝数
-	Follower int
+	// 上次更新时间
+	LastUpdate time.Time
+	// 上次更新的粉丝数
+	LastUpdateFollower int
+}
+
+func (f FollowerRecord) Save(db *gorm.DB) error {
+	return db.Save(f).Error
 }
 
 type LiveRecord struct {
