@@ -147,6 +147,10 @@ const (
 )
 
 func (b *biliPlugin) followerNotifyMode(follower int, record *FollowerRecord) NotifyMode {
+	if follower == record.LastUpdateFollower {
+		return NotNotify
+	}
+
 	nowStep := follower / specialNumStep
 	lastStep := record.LastUpdateFollower / specialNumStep
 	if nowStep > lastStep {
@@ -158,10 +162,6 @@ func (b *biliPlugin) followerNotifyMode(follower int, record *FollowerRecord) No
 		if remain <= 100 {
 			return AroundSpecialNumber
 		}
-	}
-
-	if follower == record.LastUpdateFollower {
-		return NotNotify
 	}
 
 	now := time.Now()
