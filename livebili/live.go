@@ -85,6 +85,10 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 				message.Image(info.CoverFromUser),
 				message.Text(fmt.Sprintf("https://live.bilibili.com/%d", info.RoomId)),
 			)
+			if b.gn8Iv.IsNowDND() {
+				// 免打扰状态下去除at全员
+				DeleteAtAll(&msgChain)
+			}
 			b.groups.RangeGroup(func(group int64) bool {
 				gopool.Go(func() {
 					ctx.SendGroupMessage(group, msgChain)
