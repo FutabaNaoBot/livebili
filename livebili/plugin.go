@@ -11,11 +11,12 @@ import (
 )
 
 type biliPlugin struct {
-	e      *zero.Engine
-	env    plugin.Env
-	groups plugin.Groups
-	conf   Config
-	gn8Iv  *gn8
+	e       *zero.Engine
+	env     plugin.Env
+	groups  plugin.Groups
+	conf    Config
+	gn8Iv   *gn8
+	ttfPath string
 }
 
 func NewPlugin() plugin.Plugin {
@@ -47,7 +48,7 @@ func (b *biliPlugin) Commands() fmt.Stringer {
 }
 
 func (b *biliPlugin) Version() uint64 {
-	return uint64(version.NewVersion(0, 0, 47))
+	return uint64(version.NewVersion(0, 0, 50))
 }
 
 func (b *biliPlugin) OnBoot() {

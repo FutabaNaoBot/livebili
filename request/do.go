@@ -1,6 +1,8 @@
 package request
 
 import (
+	"fmt"
+	"image"
 	"io"
 	"net/http"
 )
@@ -33,4 +35,27 @@ func DoPost(url, contentType string, body io.Reader, cookies string) (*http.Resp
 	setHeader(req, cookies)
 	client := &http.Client{}
 	return client.Do(req)
+}
+
+// FetchImage 从给定的URL下载图像，并返回 image.Image 对象
+func FetchImage(url string) (image.Image, error) {
+	// 发送 GET 请求
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch image: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// 检查 HTTP 状态码
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch image: status code %d", resp.StatusCode)
+	}
+
+	// 读取并解码图像数据
+	img, _, err := image.Decode(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode image: %v", err)
+	}
+
+	return img, nil
 }

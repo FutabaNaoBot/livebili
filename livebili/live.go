@@ -74,15 +74,32 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 	if !change {
 		return nil
 	}
+
+	ava, err := request.FetchImage(info.Face)
+	if err != nil {
+		return err
+	}
+	cover, err := request.FetchImage(info.CoverFromUser)
+	if err != nil {
+		return err
+	}
+	liveImg := NewLiveImg(b.conf.TTF, ava, info.Uname)
+
 	if living {
+		img, err := liveImg.DrawOnLive(cover, info.Title, record.LastOffTime)
+		if err != nil {
+			return err
+		}
+		imgStr, err := ImageToBase64(img)
+		if err != nil {
+			return err
+		}
 		b.env.RangeBot(func(ctx *zero.Ctx) bool {
 			var msgChain chain.MessageChain
 			msgChain.Split(
 				message.AtAll(),
-				message.Text(fmt.Sprintf("@%s", info.Uname)),
-				message.Text(formatDuration(b.conf.randChoseLiveTips(), record.LastOffTime)),
-				message.Text(info.Title),
-				message.Image(info.CoverFromUser),
+				message.Text(b.conf.randChoseLiveTips()),
+				message.Image(imgStr),
 				message.Text(fmt.Sprintf("https://live.bilibili.com/%d", info.RoomId)),
 			)
 			if b.gn8Iv.IsNowDND() {
@@ -101,12 +118,18 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 		return nil
 	}
 	if !living && b.conf.SendOff {
+		img, err := liveImg.DrawOffLive(b.conf.randChoseOffTips(), record.LastLiveTime)
+		if err != nil {
+			return err
+		}
+		imgStr, err := ImageToBase64(img)
+		if err != nil {
+			return err
+		}
 		b.env.RangeBot(func(ctx *zero.Ctx) bool {
 			var msgChain chain.MessageChain
 			msgChain.Split(
-				message.Text(fmt.Sprintf("@%s", info.Uname)),
-				message.Image(info.Face),
-				message.Text(formatDuration(b.conf.randChoseOffTips(), record.LastLiveTime)),
+				message.Text(imgStr),
 			)
 			b.groups.RangeGroup(func(group int64) bool {
 				gopool.Go(func() {
