@@ -83,14 +83,14 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 	if err != nil {
 		return err
 	}
-	liveImg := NewLiveImg(b.conf.TTF, ava, info.Uname)
+	liveImg := NewLiveImg(b.ttfPath, ava, info.Uname)
 
 	if living {
 		img, err := liveImg.DrawOnLive(cover, info.Title, record.LastOffTime)
 		if err != nil {
 			return err
 		}
-		imgStr, err := ImageToBase64(img)
+		imgB, err := ImageToBytes(img)
 		if err != nil {
 			return err
 		}
@@ -99,7 +99,7 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 			msgChain.Split(
 				message.AtAll(),
 				message.Text(b.conf.randChoseLiveTips()),
-				message.Image(imgStr),
+				message.ImageBytes(imgB),
 				message.Text(fmt.Sprintf("https://live.bilibili.com/%d", info.RoomId)),
 			)
 			if b.gn8Iv.IsNowDND() {
@@ -122,14 +122,14 @@ func (b *biliPlugin) sendRoomInfo(info *RoomInfo) error {
 		if err != nil {
 			return err
 		}
-		imgStr, err := ImageToBase64(img)
+		imgB, err := ImageToBytes(img)
 		if err != nil {
 			return err
 		}
 		b.env.RangeBot(func(ctx *zero.Ctx) bool {
 			var msgChain chain.MessageChain
 			msgChain.Split(
-				message.Text(imgStr),
+				message.ImageBytes(imgB),
 			)
 			b.groups.RangeGroup(func(group int64) bool {
 				gopool.Go(func() {

@@ -2,7 +2,6 @@ package livebili
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
@@ -238,18 +237,15 @@ func toNowDuration(dur time.Time) (hour int, minute int, second int) {
 	return hours, minutes, seconds
 }
 
-// ImageToBase64 将 image.Image 转换为 Base64 字符串
-func ImageToBase64(img image.Image) (string, error) {
+// ImageToBytes 将 image.Image 转换为 bytes
+func ImageToBytes(img image.Image) ([]byte, error) {
 	var buf bytes.Buffer
 
 	// 将图像编码为 JPEG 格式
 	err := jpeg.Encode(&buf, img, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to encode image to JPEG: %v", err)
+		return nil, fmt.Errorf("failed to encode image to JPEG: %v", err)
 	}
 
-	// 将字节流编码为 Base64
-	base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
-
-	return base64Str, nil
+	return buf.Bytes(), nil
 }
