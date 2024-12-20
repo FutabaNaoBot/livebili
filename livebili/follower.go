@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kohmebot/livebili/request"
+	"github.com/kohmebot/pkg/canvas"
 	"github.com/kohmebot/pkg/chain"
 	"github.com/kohmebot/pkg/gopool"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -80,16 +81,18 @@ func (b *biliPlugin) doCheckOneFollower(uid int64) error {
 		return err
 	}
 	var nickName string
+	var face string
 	for _, roomInfo := range live.Data {
 		nickName = roomInfo.Uname
+		face = roomInfo.Face
 		break
 	}
 
 	switch mode {
 	case TimeReached:
-		return b.onTimeReached(r.Data.Follower, record, nickName)
+		return b.onTimeReached(r.Data.Follower, record, nickName, face)
 	case FollowerChange:
-		return b.onFollowerChange(r.Data.Follower, record, nickName)
+		return b.onFollowerChange(r.Data.Follower, record, nickName, face)
 	case SpecialNumber:
 		return b.onSpecialNumber(r.Data.Follower, record, nickName)
 	case AroundSpecialNumber:
@@ -178,23 +181,37 @@ func (b *biliPlugin) followerNotifyMode(follower int, record *FollowerRecord) No
 	return NotNotify
 }
 
-func (b *biliPlugin) onTimeReached(follower int, record *FollowerRecord, nickName string) error {
-	return b.onFollowerChange(follower, record, nickName)
+func (b *biliPlugin) onTimeReached(follower int, record *FollowerRecord, nickName string, face string) error {
+	return b.onFollowerChange(follower, record, nickName, face)
 }
 
-func (b *biliPlugin) onFollowerChange(follower int, record *FollowerRecord, nickName string) error {
+func (b *biliPlugin) onFollowerChange(follower int, record *FollowerRecord, nickName string, face string) error {
 	delta := follower - record.LastUpdateFollower
-	var tips string
-	if delta > 0 {
-		tips = fmt.Sprintf("涨粉了！！🔺%d ", delta)
-	} else {
-		tips = fmt.Sprintf("掉粉了...🔻%d ", -delta)
+	var factory canvas.ImageFactory
+	factory.Url(face)
+	img, err := factory.Get()
+	if err != nil {
+		return err
 	}
+	fi := NewFollowerImg(b.ttfPath, img, nickName)
+
+	var c *canvas.Canvas
+	if delta > 0 {
+		c, err = fi.DrawUpFollower(follower, delta)
+	} else {
+		c, err = fi.DrawDownFollower(follower, -delta)
+	}
+	if err != nil {
+		return err
+	}
+	imgBytes, err := c.ToBytes()
+	if err != nil {
+		return err
+	}
+
 	var msgChain chain.MessageChain
 	msgChain.Split(
-		message.Text(fmt.Sprintf("@%s", nickName)),
-		message.Text(tips),
-		message.Text(fmt.Sprintf("%d → %d", record.LastUpdateFollower, follower)),
+		message.ImageBytes(imgBytes),
 	)
 
 	for ctx := range b.env.RangeBot {
